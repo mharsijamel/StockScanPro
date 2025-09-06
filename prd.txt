@@ -1,0 +1,246 @@
+Document de Spécifications Fonctionnelles (PRD)
+
+Application Flutter pour la gestion des numéros de série (SN) avec Odoo 15
+
+1. Introduction & Objectifs
+
+L’objectif de ce projet est de développer une application mobile Flutter connectée à Odoo 15 via une API REST, permettant de scanner les numéros de série (SN) des produits lors des opérations de réception (Stock IN) et livraison (Stock OUT).
+
+Les objectifs principaux sont :
+
+Accélérer la saisie des SN via scan (code-barres ou QR code).
+
+Garantir la traçabilité des produits dans Odoo.
+
+Fonctionner hors ligne avec synchronisation ultérieure.
+
+Vérifier les doublons de SN pour Stock IN et l’existence des SN pour Stock OUT.
+
+2. Contexte & Problématique
+
+Actuellement, la saisie des SN se fait manuellement dans Odoo, ce qui est long et source d’erreurs.
+
+L’objectif est d’offrir une solution mobile rapide, fiable et compatible avec Odoo.
+
+3. Description Générale de l’Application
+
+Technologie : Flutter (dernière version stable : Flutter 3.x)
+
+Compatibilité : Android & iOS
+
+Base locale : SQLite pour stockage temporaire
+
+Connexion API : REST API basée sur Odoo 15
+
+Fonctionnalités principales :
+
+✔ Connexion & Synchronisation avec Odoo
+✔ Sélection du type d’opération (Stock IN / Stock OUT)
+✔ Affichage des listes de transferts (non reçus / non livrés)
+✔ Sélection d’un picking → liste des produits
+✔ Scan SN + Saisie emplacement
+✔ Vérification doublons (IN) & existence (OUT)
+✔ Sauvegarde locale + Synchronisation manuelle
+
+4. Architecture Technique
+Front-End (Flutter)
+
+Flutter 3.x
+
+State management : Provider ou Riverpod
+
+SQLite via sqflite
+
+Scan : barcode_scan2 ou flutter_barcode_scanner
+
+Back-End (Odoo 15)
+
+API REST basée sur Odoo Controller
+
+Authentification : token ou session Odoo
+
+Routes sécurisées par ACL (Access Control List)
+
+5. Parcours Utilisateur (User Flow)
+Étapes principales :
+
+Écran Connexion → Authentification via API Odoo
+
+Écran Synchronisation → Bouton “Sync” pour charger les données pickings
+
+Écran Menu Principal → 2 options :
+
+Stock IN (Réceptions)
+
+Stock OUT (Livraisons)
+
+Sélection d’un Picking → Liste des transferts disponibles
+
+Liste Produits → Choisir un produit
+
+Scan SN + Placement
+
+Vérifier doublon SN (IN)
+
+Vérifier existence SN (OUT)
+
+Enregistrer en local SQLite
+
+Synchronisation vers Odoo → Envoi via API
+
+6. Exigences Fonctionnelles
+6.1. Connexion & Sync
+
+Authentification avec identifiants Odoo (login + mot de passe).
+
+Stockage du token dans Secure Storage.
+
+Bouton Sync → récupère pickings IN & OUT non terminés.
+
+6.2. Stock IN
+
+Affichage liste des pickings type incoming.
+
+Sélection d’un picking → afficher produits.
+
+Scan SN + saisie emplacement (manuel).
+
+Vérifier SN déjà scanné (local) → message “Doublon”.
+
+Stocker en local (SQLite).
+
+6.3. Stock OUT
+
+Affichage liste des pickings type outgoing.
+
+Sélection d’un picking → afficher produits.
+
+Scan SN → vérifier via API Odoo si SN existe.
+
+Si SN inexistant → erreur “SN introuvable”.
+
+6.4. Synchronisation
+
+Bouton Envoyer vers Odoo → POST vers API.
+
+Mise à jour du picking dans Odoo (move_line_ids avec SN + emplacement).
+
+7. Exigences Non Fonctionnelles
+
+Performance : Synchronisation < 3 sec par 50 SN.
+
+Sécurité : HTTPS obligatoire + token sécurisé.
+
+Compatibilité : Android 8+ & iOS 13+.
+
+Mode Offline : Fonctionnalité offline avec sync différée.
+
+8. Wireframes (Structure Écrans)
+
+📌 Écrans principaux :
+
+Login (Email, Mot de passe, Bouton Connexion)
+
+Dashboard (Bouton Sync + Icônes Stock IN / Stock OUT)
+
+Liste des Pickings
+
+Liste Produits
+
+Écran Scan SN + Champ Emplacement + Liste scannée
+
+Écran Synchronisation (statut)
+
+(Je peux dessiner les wireframes si tu veux ✅)
+
+9. Schéma BDD Locale (SQLite)
+Tables :
+
+Table pickings
+
+id (int)
+
+picking_id (Odoo ID)
+
+type (IN/OUT)
+
+status (draft, done)
+
+Table products
+
+id (int)
+
+product_id (Odoo ID)
+
+picking_id (FK)
+
+name (text)
+
+Table scanned_sn
+
+id (int)
+
+product_id (FK)
+
+serial_number (text)
+
+location (text)
+
+synced (bool)
+
+10. Spécifications API Odoo 15
+10.1. Authentification
+
+POST /api/auth/login
+Body : { "login": "user", "password": "pass" }
+Réponse : { "token": "abcd1234" }
+
+10.2. Récupération des Pickings
+
+GET /api/pickings?type=in/out&status=pending
+Réponse :
+
+[
+  {
+    "id": 45,
+    "name": "WH/IN/00045",
+    "products": [
+      { "id": 12, "name": "Produit A", "qty": 10 }
+    ]
+  }
+]
+
+10.3. Vérification SN (Stock OUT)
+
+GET /api/serial/check?sn=XYZ123
+Réponse : { "exists": true }
+
+10.4. Envoi des SN scannés
+
+POST /api/pickings/{id}/update_sn
+Body :
+
+{
+  "lines": [
+    { "product_id": 12, "sn": "XYZ123", "location": "A1" }
+  ]
+}
+
+
+Réponse : { "success": true }
+
+11. Cas d’Utilisation (User Stories)
+
+En tant qu’utilisateur, je peux me connecter à Odoo via l’app pour accéder aux données de stock.
+
+En tant qu’utilisateur, je peux scanner les SN sans connexion Internet et synchroniser plus tard.
+
+En tant qu’utilisateur, je veux être alerté si un SN est doublon (Stock IN) ou inexistant (Stock OUT).
+
+12. Risques & Contraintes
+
+Dépendance à la connexion réseau pour synchronisation.
+
+Compatibilité avec lecteurs de codes-barres externes.
+
+Volume important de SN → optimisation SQLite.
