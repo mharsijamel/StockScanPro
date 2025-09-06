@@ -44,12 +44,12 @@ class StockScanProApp extends StatelessWidget {
   final SyncService syncService;
 
   const StockScanProApp({
-    Key? key,
+    super.key,
     required this.databaseService,
     required this.apiService,
     required this.authService,
     required this.syncService,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +85,7 @@ class StockScanProApp extends StatelessWidget {
     );
   }
 
-  late final GoRouter _router = GoRouter(
+  GoRouter get _router => GoRouter(
     initialLocation: '/splash',
     routes: [
       GoRoute(
@@ -129,11 +129,11 @@ class StockScanProApp extends StatelessWidget {
     redirect: (context, state) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final isLoggedIn = authProvider.isAuthenticated;
-      
-      if (!isLoggedIn && state.location != '/login' && state.location != '/splash') {
+
+      if (!isLoggedIn && state.uri.toString() != '/login' && state.uri.toString() != '/splash') {
         return '/login';
       }
-      
+
       return null;
     },
   );
