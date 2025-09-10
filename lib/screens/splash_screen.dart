@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
+import '../services/api_service.dart';
 import '../constants/app_constants.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -18,12 +19,16 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
 
+  String _loadingMessage = 'Vérification de la connexion...';
+  bool _showError = false;
+  String _errorMessage = '';
+
   @override
   void initState() {
     super.initState();
     
     _animationController = AnimationController(
-      duration: const Duration(seconds: 2),
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
 
@@ -40,12 +45,13 @@ class _SplashScreenState extends State<SplashScreen>
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: Curves.elasticOut,
+      curve: const Interval(0.0, 0.7, curve: Curves.elasticOut),
     ));
 
     _animationController.forward();
     
-    _checkAuthenticationStatus();
+    // Delay initialization slightly to allow animation to start
+    Future.delayed(const Duration(seconds: 1), _initializeApp);
   }
 
   @override
@@ -54,18 +60,49 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  Future<void> _checkAuthenticationStatus() async {
-    // Wait for animation to complete
-    await Future.delayed(const Duration(seconds: 2));
-    
+  Future<void> _initializeApp() async {
     if (!mounted) return;
-    
+
+    setState(() {
+      _showError = false;
+      _loadingMessage = 'Vérification du serveur Odoo...';
+    });
+
+    final apiService = Provider.of<ApiService>(context, listen: false);
+    final healthResult = await apiService.healthCheck();
+
+    if (!mounted) return;
+
+    switch (healthResult) {
+      case HealthCheckResult.ok:
+        setState(() {
+          _loadingMessage = 'Vérification de l\'utilisateur...';
+        });
+        await _checkAuthenticationStatus();
+        break;
+      case HealthCheckResult.notFound:
+        context.go('/backend-error');
+        break;
+      case HealthCheckResult.networkError:
+        setState(() {
+          _showError = true;
+          _errorMessage = 'Erreur de réseau. Veuillez vérifier votre connexion internet et réessayer.';
+        });
+        break;
+      case HealthCheckResult.unknownError:
+        setState(() {
+          _showError = true;
+          _errorMessage = 'Une erreur inconnue est survenue. Veuillez réessayer.';
+        });
+        break;
+    }
+  }
+
+  Future<void> _checkAuthenticationStatus() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
     try {
-      // Check if user is already authenticated
       final isAuthenticated = await authProvider.checkAuthenticationStatus();
-      
       if (!mounted) return;
       
       if (isAuthenticated) {
@@ -74,7 +111,7 @@ class _SplashScreenState extends State<SplashScreen>
         context.go('/login');
       }
     } catch (e) {
-      // If there's an error checking auth status, go to login
+      // If there's an error (e.g. invalid token), go to login
       if (mounted) {
         context.go('/login');
       }
@@ -141,20 +178,8 @@ class _SplashScreenState extends State<SplashScreen>
                     
                     const SizedBox(height: 50),
                     
-                    // Loading Indicator
-                    const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                    
-                    const SizedBox(height: 20),
-                    
-                    // Loading Text
-                    Text(
-                      'Chargement...',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.8),
-                      ),
-                    ),
+                    // Loading/Error content
+                    _buildStatusContent(),
                   ],
                 ),
               ),
@@ -163,5 +188,47 @@ class _SplashScreenState extends State<SplashScreen>
         ),
       ),
     );
+  }
+
+  Widget _buildStatusContent() {
+    if (_showError) {
+      return Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Text(
+              _errorMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.yellow[200], fontSize: 16),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.refresh),
+            label: const Text('Réessayer'),
+            onPressed: _initializeApp,
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Theme.of(context).primaryColor,
+              backgroundColor: Colors.white,
+            ),
+          ),
+        ],
+      );
+    } else {
+      return Column(
+        children: [
+          const CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            _loadingMessage,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withOpacity(0.8),
+            ),
+          ),
+        ],
+      );
+    }
   }
 }

@@ -8,6 +8,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   String? _username;
+  int? lastErrorStatusCode;
   
   AuthProvider(this._authService);
   
@@ -62,6 +63,7 @@ class AuthProvider extends ChangeNotifier {
   Future<Map<String, dynamic>> loginWithDatabase(String username, String password, String database) async {
     _setLoading(true);
     _error = null;
+    lastErrorStatusCode = null;
 
     try {
       final result = await _authService.loginWithDatabase(username, password, database);
@@ -72,6 +74,9 @@ class AuthProvider extends ChangeNotifier {
         return result;
       } else {
         _error = result['message'] ?? 'Erreur de connexion';
+        if (result['status_code'] is int) {
+          lastErrorStatusCode = result['status_code'];
+        }
         return result;
       }
     } catch (e) {

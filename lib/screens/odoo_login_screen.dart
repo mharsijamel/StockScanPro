@@ -246,12 +246,38 @@ class _OdooLoginScreenState extends State<OdooLoginScreen> {
         );
         context.go('/dashboard');
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result['message'] ?? 'Erreur de connexion'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // Check for the specific 404 backend error
+        if (authProvider.lastErrorStatusCode == 404) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Erreur de Connexion au Module'),
+              content: const Text(
+                  'Le module backend requis est introuvable. Ceci indique un problème de configuration du serveur Odoo.'),
+              actions: [
+                TextButton(
+                  child: const Text('OK'),
+                  onPressed: () => Navigator.of(ctx).pop(),
+                ),
+                TextButton(
+                  child: const Text('Voir les détails'),
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    context.go('/backend-error');
+                  },
+                ),
+              ],
+            ),
+          );
+        } else {
+          // Show generic error for other failures
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? 'Erreur de connexion'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

@@ -12,6 +12,7 @@ import 'screens/stock_in_screen.dart';
 import 'screens/stock_out_screen.dart';
 import 'screens/scanning_screen.dart';
 import 'screens/history_screen.dart';
+import 'screens/backend_error_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,6 +74,12 @@ class StockScanProApp extends StatelessWidget {
         GoRoute(
           path: '/history',
           builder: (context, state) => const HistoryScreen(),
+        ),
+        GoRoute(
+          path: '/backend-error',
+          builder: (context, state) => BackendErrorScreen(
+            onRetry: () => context.go('/splash'),
+          ),
         ),
       ],
       redirect: (context, state) {
