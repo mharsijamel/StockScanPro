@@ -26,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -49,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen>
     ));
 
     _animationController.forward();
-    
+
     // Delay initialization slightly to allow animation to start
     Future.delayed(const Duration(seconds: 1), _initializeApp);
   }
@@ -86,19 +86,18 @@ class _SplashScreenState extends State<SplashScreen>
       case HealthCheckResult.networkError:
         setState(() {
           _showError = true;
-          _errorMessage = 'Erreur de réseau. Veuillez vérifier votre connexion internet et réessayer.';
+          _errorMessage =
+              'Erreur de réseau. Veuillez vérifier votre connexion internet et réessayer.';
         });
         break;
       case HealthCheckResult.badRequest:
-        setState(() {
-          _showError = true;
-          _errorMessage = 'Erreur de requête. Le serveur a rejeté la demande de l\'application. Veuillez contacter le support.';
-        });
+        context.go('/backend-error');
         break;
       case HealthCheckResult.unknownError:
         setState(() {
           _showError = true;
-          _errorMessage = 'Une erreur inconnue est survenue. Veuillez réessayer.';
+          _errorMessage =
+              'Une erreur inconnue est survenue. Veuillez réessayer.';
         });
         break;
     }
@@ -106,11 +105,11 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _checkAuthenticationStatus() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     try {
       final isAuthenticated = await authProvider.checkAuthenticationStatus();
       if (!mounted) return;
-      
+
       if (isAuthenticated) {
         context.go('/dashboard');
       } else {
@@ -160,30 +159,31 @@ class _SplashScreenState extends State<SplashScreen>
                         color: Colors.blue,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 30),
-                    
+
                     // App Name
                     Text(
                       AppConstants.appName,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
-                    
+
                     const SizedBox(height: 10),
-                    
+
                     // App Subtitle
                     Text(
                       'Gestion des numéros de série',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withOpacity(0.8),
-                      ),
+                            color: Colors.white.withOpacity(0.8),
+                          ),
                     ),
-                    
+
                     const SizedBox(height: 50),
-                    
+
                     // Loading/Error content
                     _buildStatusContent(),
                   ],
@@ -230,8 +230,8 @@ class _SplashScreenState extends State<SplashScreen>
           Text(
             _loadingMessage,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withOpacity(0.8),
-            ),
+                  color: Colors.white.withOpacity(0.8),
+                ),
           ),
         ],
       );
