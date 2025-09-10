@@ -3,6 +3,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/app_constants.dart';
 import '../config/app_config.dart';
 
+enum HealthCheckResult {
+  ok,
+  notFound,
+  networkError,
+  unknownError,
+}
+
 class ApiService {
   String get baseUrl => AppConfig.currentBaseUrl;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
@@ -182,20 +189,36 @@ class ApiService {
     };
   }
 
-  // Check network connectivity
-  Future<bool> checkConnectivity() async {
+  // Perform a health check to determine API status
+  Future<HealthCheckResult> healthCheck() async {
     try {
-      final response = await _dio.get(
+      await _dio.get(
         '/health',
+        // Use a shorter timeout for the health check
         options: Options(
           sendTimeout: const Duration(seconds: 5),
           receiveTimeout: const Duration(seconds: 5),
         ),
       );
-
-      return response.statusCode == 200;
-    } catch (e) {
-      return false;
+      // If we get a 2xx response, the API is OK.
+      return HealthCheckResult.ok;
+    } on DioException catch (e) {
+      // If we get a 404, it means the module is not installed/active
+      if (e.response?.statusCode == 404) {
+        return HealthCheckResult.notFound;
+      }
+      // For timeouts or other connection issues, it's a network error
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionError) {
+        return HealthCheckResult.networkError;
+      }
+      // For other Dio errors, it's an unknown issue
+      return HealthCheckResult.unknownError;
+    } catch (_) {
+      // For any other non-Dio exception
+      return HealthCheckResult.unknownError;
     }
   }
 }

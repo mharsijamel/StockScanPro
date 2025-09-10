@@ -456,6 +456,7 @@ class AuthService {
         return {
           'success': false,
           'message': errorMessage,
+          'status_code': response.statusCode,
         };
       }
     } on SocketException catch (e) {
