@@ -1,5 +1,12 @@
 # Installation Guide - Stock Scan Mobile API Module
 
+## ⚠️ **ERREURS CORRIGÉES**
+
+Les erreurs suivantes ont été corrigées dans cette version :
+- ✅ **Ordre de chargement** : security.xml avant ir.model.access.csv
+- ✅ **Hook post_init** supprimé (non nécessaire)
+- ✅ **Références de groupes** corrigées
+
 ## Prerequisites
 
 - Odoo 15.0 or higher

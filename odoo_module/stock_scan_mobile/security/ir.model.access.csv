@@ -8,7 +8,6 @@ access_product_template_mobile_user,product.template mobile user,product.model_p
 access_stock_quant_mobile_user,stock.quant mobile user,stock.model_stock_quant,group_mobile_user,1,0,0,0
 access_stock_location_mobile_user,stock.location mobile user,stock.model_stock_location,group_mobile_user,1,0,0,0
 access_stock_picking_type_mobile_user,stock.picking.type mobile user,stock.model_stock_picking_type,group_mobile_user,1,0,0,0
-access_uom_uom_mobile_user,uom.uom mobile user,uom.model_uom,group_mobile_user,1,0,0,0
 access_res_partner_mobile_user,res.partner mobile user,base.model_res_partner,group_mobile_user,1,0,0,0
 access_stock_picking_mobile_manager,stock.picking mobile manager,stock.model_stock_picking,group_mobile_manager,1,1,1,1
 access_stock_move_mobile_manager,stock.move mobile manager,stock.model_stock_move,group_mobile_manager,1,1,1,1
@@ -18,4 +17,3 @@ access_product_product_mobile_manager,product.product mobile manager,product.mod
 access_product_template_mobile_manager,product.template mobile manager,product.model_product_template,group_mobile_manager,1,1,1,0
 access_stock_quant_mobile_manager,stock.quant mobile manager,stock.model_stock_quant,group_mobile_manager,1,1,0,0
 access_stock_location_mobile_manager,stock.location mobile manager,stock.model_stock_location,group_mobile_manager,1,1,0,0
-access_ir_config_parameter_mobile_manager,ir.config_parameter mobile manager,base.model_ir_config_parameter,group_mobile_manager,1,1,1,0

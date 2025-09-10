@@ -42,7 +42,7 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> login(String username, String password) async {
     _setLoading(true);
     _error = null;
-    
+
     try {
       final success = await _authService.login(username, password);
       if (success) {
@@ -53,6 +53,33 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Login method with database
+  Future<Map<String, dynamic>> loginWithDatabase(String username, String password, String database) async {
+    _setLoading(true);
+    _error = null;
+
+    try {
+      final result = await _authService.loginWithDatabase(username, password, database);
+
+      if (result['success'] == true) {
+        _isAuthenticated = true;
+        _username = username;
+        return result;
+      } else {
+        _error = result['message'] ?? 'Erreur de connexion';
+        return result;
+      }
+    } catch (e) {
+      _error = 'Erreur de connexion: ${e.toString()}';
+      return {
+        'success': false,
+        'message': 'Erreur de connexion: ${e.toString()}',
+      };
     } finally {
       _setLoading(false);
     }
@@ -74,6 +101,15 @@ class AuthProvider extends ChangeNotifier {
     }
   }
   
+  // Test connection to server
+  Future<bool> testConnection() async {
+    try {
+      return await _authService.testConnection();
+    } catch (e) {
+      return false;
+    }
+  }
+
   // Clear error
   void clearError() {
     _error = null;

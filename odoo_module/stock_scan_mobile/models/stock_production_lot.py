@@ -19,26 +19,26 @@ class StockProductionLot(models.Model):
     def search_serial_numbers(self, search_term, product_id=None, limit=50):
         """
         Search serial numbers for mobile app
-        
+
         Args:
             search_term (str): Serial number search term
             product_id (int): Optional product filter
             limit (int): Maximum results
-            
+
         Returns:
             list: List of serial number data
         """
         domain = [('name', 'ilike', search_term)]
-        
+
         if product_id:
             domain.append(('product_id', '=', product_id))
-        
+
         lots = self.search(domain, limit=limit, order='name')
-        
+
         result = []
         for lot in lots:
             result.append(lot._format_for_mobile())
-        
+
         return result
 
     def _format_for_mobile(self):
