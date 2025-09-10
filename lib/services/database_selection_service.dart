@@ -37,7 +37,11 @@ class DatabaseSelectionService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode({}),
+        body: jsonEncode({
+          'jsonrpc': '2.0',
+          'method': 'call',
+          'params': {},
+        }),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -181,7 +185,11 @@ class DatabaseSelectionService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode({}),
+        body: jsonEncode({
+          'jsonrpc': '2.0',
+          'method': 'call',
+          'params': {},
+        }),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {

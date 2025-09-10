@@ -89,6 +89,12 @@ class _SplashScreenState extends State<SplashScreen>
           _errorMessage = 'Erreur de réseau. Veuillez vérifier votre connexion internet et réessayer.';
         });
         break;
+      case HealthCheckResult.badRequest:
+        setState(() {
+          _showError = true;
+          _errorMessage = 'Erreur de requête. Le serveur a rejeté la demande de l\'application. Veuillez contacter le support.';
+        });
+        break;
       case HealthCheckResult.unknownError:
         setState(() {
           _showError = true;

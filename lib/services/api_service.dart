@@ -6,6 +6,7 @@ import '../config/app_config.dart';
 enum HealthCheckResult {
   ok,
   notFound,
+  badRequest,
   networkError,
   unknownError,
 }
@@ -206,6 +207,9 @@ class ApiService {
       // If we get a 404, it means the module is not installed/active
       if (e.response?.statusCode == 404) {
         return HealthCheckResult.notFound;
+      }
+      if (e.response?.statusCode == 400) {
+        return HealthCheckResult.badRequest;
       }
       // For timeouts or other connection issues, it's a network error
       if (e.type == DioExceptionType.connectionTimeout ||
