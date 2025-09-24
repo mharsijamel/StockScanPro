@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => '__root__',
+        'pretty_version' => '1.0.0+no-version-set',
+        'version' => '1.0.0.0',
+        'reference' => NULL,
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => true,
+    ),
+    'versions' => array(
+        '__root__' => array(
+            'pretty_version' => '1.0.0+no-version-set',
+            'version' => '1.0.0.0',
+            'reference' => NULL,
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'darkaonline/ripcord' => array(
+            'pretty_version' => 'v0.3',
+            'version' => '0.3.0.0',
+            'reference' => 'e511f0569aff024b4a039fedc06c3101fe45ab99',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../darkaonline/ripcord',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'phpxmlrpc/phpxmlrpc' => array(
+            'pretty_version' => '4.11.2',
+            'version' => '4.11.2.0',
+            'reference' => 'f095a46961567dba2a1e8149d9d5f7cbca19673d',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpxmlrpc/phpxmlrpc',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

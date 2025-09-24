@@ -1,0 +1,6 @@
+{
+    "require": {
+        "phpxmlrpc/phpxmlrpc": "^4.11",
+        "darkaonline/ripcord": "^0.3.0"
+    }
+}

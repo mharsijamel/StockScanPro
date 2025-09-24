@@ -1,0 +1,39 @@
+🎯 Objectif
+
+Développer une API en PHP utilisant XML-RPC pour se connecter à Odoo ERP, authentifier les utilisateurs et leur fournir un token. L’API doit permettre de consulter et synchroniser les mouvements de stock (stock.picking) et leurs lignes, avec une interface simple pour les utilisateurs.
+
+⚙️ Fonctionnalités principales
+1. Authentification & Token
+
+Entrées : url, database, login, password.
+
+Connexion à Odoo via XML-RPC.
+
+Si l’authentification réussit → générer un token d’accès unique pour l’utilisateur.
+
+Ce token sera utilisé pour les appels suivants afin d’éviter de transmettre login/password à chaque requête.
+
+Les tokens expirent après une durée configurable (ex. 24h).
+
+2. Lecture des mouvements de stock (stock.picking)
+
+L’utilisateur peut consulter les stock pickings filtrés par :
+
+picking_type_code = "incoming" (réceptions)
+
+picking_type_code = "outgoing" (livraisons)
+
+state = "ready" uniquement.
+
+Résultat renvoyé :
+
+id du picking
+
+name (référence)
+
+scheduled_date
+
+partner_id (fournisseur/client)
+
+state
+3*cette api va être utilisé par app android 

@@ -1,0 +1,19 @@
+RewriteEngine On
+RewriteBase /
+
+# Fix Authorization header for PHP
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
+# Redirige /api/auth vers api/auth.php
+RewriteRule ^api/auth/?$ api/auth.php [L,NC]
+
+# Redirige /api/stock vers api/stock.php
+RewriteRule ^api/stock/?$ api/stock.php [L,NC]
+
+# Redirige /api/picking/123 vers api/picking_details.php?id=123
+RewriteRule ^api/picking/(\d+)/?$ api/picking_details.php?id=$1 [L,NC]
+
+# Empêcher l'accès direct aux fichiers dans le dossier common
+RewriteRule ^common/.*$ - [F,L]
+
