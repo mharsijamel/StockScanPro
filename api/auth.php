@@ -1,8 +1,7 @@
 <?php
-require_once __DIR__ . '/../common/OdooConnector.php';
-require_once __DIR__ . '/../common/TokenManager.php';
-require_once __DIR__ . '/../config.php';
-
+require_once __DIR__ . '/common/OdooConnector.php';
+require_once __DIR__ . '/common/TokenManager.php';
+require_once __DIR__ . '/config.php';
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

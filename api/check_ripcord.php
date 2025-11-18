@@ -1,6 +1,6 @@
 <?php
 echo "Checking Ripcord files:\n";
-$ripcord_dir = __DIR__ . '/../';
+$ripcord_dir = __DIR__ . '/';
 $files = scandir($ripcord_dir);
 foreach ($files as $file) {
     if (strpos($file, 'ripcord') !== false) {
