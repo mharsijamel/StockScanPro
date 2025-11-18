@@ -1,8 +1,9 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/auth_models.dart';
 import '../providers/auth_provider.dart';
-import 'package:flutter/animation.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -43,20 +44,63 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    log('🔑 Login attempt started');
+    
+    if (!_formKey.currentState!.validate()) {
+      log('❌ Form validation failed');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all required fields'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    log('📝 Form validated, attempting login...');
+    log('🌐 URL: ${_urlController.text}');
+    log('🗄️ Database: ${_dbController.text}');
+    log('👤 Login: ${_loginController.text}');
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final success = await authProvider.login(AuthRequest(
-      url: _urlController.text,
-      database: _dbController.text,
-      login: _loginController.text,
-      password: _passwordController.text,
-    ));
+    
+    try {
+      final success = await authProvider.login(AuthRequest(
+        url: _urlController.text.trim(),
+        database: _dbController.text.trim(),
+        login: _loginController.text.trim(),
+        password: _passwordController.text,
+      ));
 
-    if (!success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Échec authentification')),
-      );
+      log('🔍 Login result: $success');
+      log('📊 Auth status: ${authProvider.status}');
+
+      if (success && mounted) {
+        log('✅ Login successful, navigating to home screen');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      } else if (mounted) {
+        log('❌ Login failed');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login failed. Please check your credentials and connection.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (error) {
+      log('💥 Login error: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Connection error: ${error.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
     }
   }
 
@@ -93,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Connexion Odoo',
+                          'Odoo Stock Viewer',
                           style: Theme.of(context)
                               .textTheme
                               .headlineMedium
@@ -105,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen>
                               Shadow(
                                 blurRadius: 4,
                                 color: Colors.black.withOpacity(0.25),
-                                offset: Offset(2, 2),
+                                offset: const Offset(2, 2),
                               ),
                             ],
                           ),
@@ -114,68 +158,93 @@ class _LoginScreenState extends State<LoginScreen>
                         TextFormField(
                           controller: _urlController,
                           decoration: InputDecoration(
-                            labelText: 'URL Odoo',
-                            prefixIcon: Icon(Icons.link),
+                            labelText: 'Odoo URL',
+                            prefixIcon: const Icon(Icons.link),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.0),
                             ),
+                            helperText: 'Example: https://your-odoo-server.com',
                           ),
-                          validator: (value) =>
-                              value!.isEmpty ? 'Champ requis' : null,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'URL is required';
+                            }
+                            if (!value.startsWith('http')) {
+                              return 'URL must start with http:// or https://';
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 20),
                         TextFormField(
                           controller: _dbController,
                           decoration: InputDecoration(
-                            labelText: 'Base de données',
-                            prefixIcon: Icon(Icons.storage),
+                            labelText: 'Database Name',
+                            prefixIcon: const Icon(Icons.storage),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.0),
                             ),
                           ),
                           validator: (value) =>
-                              value!.isEmpty ? 'Champ requis' : null,
+                              value == null || value.isEmpty ? 'Database name is required' : null,
                         ),
                         const SizedBox(height: 20),
                         TextFormField(
                           controller: _loginController,
                           decoration: InputDecoration(
-                            labelText: 'Login',
-                            prefixIcon: Icon(Icons.person),
+                            labelText: 'Username/Email',
+                            prefixIcon: const Icon(Icons.person),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.0),
                             ),
                           ),
                           validator: (value) =>
-                              value!.isEmpty ? 'Champ requis' : null,
+                              value == null || value.isEmpty ? 'Username is required' : null,
                         ),
                         const SizedBox(height: 20),
                         TextFormField(
                           controller: _passwordController,
                           obscureText: true,
                           decoration: InputDecoration(
-                            labelText: 'Mot de passe',
-                            prefixIcon: Icon(Icons.lock),
+                            labelText: 'Password',
+                            prefixIcon: const Icon(Icons.lock),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.0),
                             ),
                           ),
                           validator: (value) =>
-                              value!.isEmpty ? 'Champ requis' : null,
+                              value == null || value.isEmpty ? 'Password is required' : null,
                         ),
                         const SizedBox(height: 40),
                         if (authProvider.status == AuthStatus.Authenticating)
-                          Center(child: CircularProgressIndicator())
+                          const Column(
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(height: 16),
+                              Text(
+                                'Connecting to Odoo...',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          )
                         else
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: _submit,
-                              child: const Text('Connexion'),
                               style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text(
+                                'Connect',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),

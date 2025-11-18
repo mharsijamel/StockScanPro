@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../api/api_service.dart';
@@ -41,12 +42,23 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<bool> login(AuthRequest credentials) async {
+    log('🔑 AuthProvider: Starting login process');
+    log('🌐 AuthProvider: URL: ${credentials.url}');
+    log('🗄️ AuthProvider: Database: ${credentials.database}');
+    log('👤 AuthProvider: Login: ${credentials.login}');
+    
     _status = AuthStatus.Authenticating;
     notifyListeners();
+    log('📱 AuthProvider: Status set to Authenticating');
 
     try {
+      log('📞 AuthProvider: Calling API service...');
       AuthResponse response = await _apiService.login(credentials);
+      log('💬 AuthProvider: API response received');
+      log('📈 AuthProvider: Response status: ${response.status}');
+      
       if (response.status == 'success' && response.token != null) {
+        log('✅ AuthProvider: Login successful');
         _token = response.token;
         _credentials = credentials;
         _status = AuthStatus.Authenticated;
@@ -56,17 +68,20 @@ class AuthProvider with ChangeNotifier {
         // On sauvegarde les credentials pour les réutiliser, sauf le mot de passe
         await prefs.setString('credentials', json.encode(credentials.toJson()));
         
+        log('💾 AuthProvider: Credentials saved to storage');
         notifyListeners();
         return true;
       } else {
+        log('❌ AuthProvider: Login failed - ${response.message ?? "Unknown error"}');
         _status = AuthStatus.Unauthenticated;
         notifyListeners();
         return false;
       }
     } catch (e) {
+      log('💥 AuthProvider: Exception during login: $e');
       _status = AuthStatus.Unauthenticated;
       notifyListeners();
-      return false;
+      rethrow; // Re-throw to let the UI handle the specific error
     }
   }
 

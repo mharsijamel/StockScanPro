@@ -31,38 +31,81 @@ class _HomeScreenState extends State<HomeScreen>
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Stock Pickings'), // Changed title
-        elevation: 4.0,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => authProvider.logout(),
-            tooltip: 'Déconnexion',
+      body: Column(
+        children: [
+          // Custom Header with gradient background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF1976D2), // Dark blue
+                  Color(0xFF42A5F5), // Light blue
+                ],
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // Header with title and menu
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Stock Pickings',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.logout,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                          onPressed: () => authProvider.logout(),
+                          tooltip: 'Déconnexion',
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Tab Bar
+                  TabBar(
+                    controller: _tabController,
+                    indicatorColor: Colors.white,
+                    indicatorWeight: 3,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white70,
+                    labelStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    tabs: const [
+                      Tab(text: 'INCOMING'),
+                      Tab(text: 'OUTGOING'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
-        // Add TabBar to the AppBar's bottom
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white, // Indicator for selected tab
-          labelColor: Colors.white, // Text color for selected tab
-          unselectedLabelColor:
-              Colors.white.withOpacity(0.7), // Text color for unselected tabs
-          tabs: const [
-            Tab(text: 'INCOMING'), // Tab 1
-            Tab(text: 'OUTGOING'), // Tab 2
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          // Content for the "Incoming" tab
-          PickingListScreen(pickingType: 'incoming', title: 'Réceptions'),
-          // Content for the "Outgoing" tab
-          PickingListScreen(pickingType: 'outgoing', title: 'Livraisons'),
+          // Content Area
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: const [
+                // Content for the "Incoming" tab
+                PickingListScreen(pickingType: 'incoming', title: 'Réceptions'),
+                // Content for the "Outgoing" tab
+                PickingListScreen(pickingType: 'outgoing', title: 'Livraisons'),
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -1,10 +1,10 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/animation.dart';
 import '../models/picking.dart';
 import '../providers/auth_provider.dart';
 import '../providers/picking_provider.dart';
+import 'serial_scan_screen.dart';
 
 class PickingDetailScreen extends StatefulWidget {
   final Picking picking;
@@ -49,201 +49,216 @@ class _PickingDetailScreenState extends State<PickingDetailScreen>
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.picking.name),
-        elevation: 4.0,
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: const Color(0xFF1976D2),
         foregroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert),
+            onPressed: () {
+              // Add menu functionality
+            },
+          ),
+        ],
       ),
       body: Consumer<PickingProvider>(
         builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
           return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Card(
-                  elevation: 8,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.picking.name,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontSize: 28,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 4,
-                                color: Colors.black.withOpacity(0.25),
-                                offset: Offset(2, 2),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Icon(Icons.person,
-                                size: 24, color: Colors.grey.shade600),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Text(
-                                widget.picking.partnerName,
-                                style: Theme.of(context).textTheme.titleLarge,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Icon(Icons.calendar_today,
-                                size: 24, color: Colors.grey.shade600),
-                            const SizedBox(width: 16),
-                            Text(
-                              widget.picking.scheduledDate.split(' ').first,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ],
-                        ),
-                        if (widget.picking.origin != null &&
-                            widget.picking.origin!.isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Icon(Icons.info_outline,
-                                  size: 24, color: Colors.grey.shade600),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Text(
-                                  'Origine: ${widget.picking.origin}',
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0, vertical: 16.0),
-                child: Text(
-                  'Lignes de mouvement',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontSize: 24,
-                      ),
-                ),
-              ),
+              // Stock Move Lines List
               Expanded(
-                child: provider.pickingLines.isEmpty
-                    ? Center(
+                child: provider.isLoading
+                    ? const Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.info_outline,
-                                size: 80,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withOpacity(0.6)),
-                            const SizedBox(height: 24),
+                            CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF1976D2)),
+                            ),
+                            SizedBox(height: 16),
                             Text(
-                              'Aucune ligne trouvée pour ce mouvement.',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineSmall
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withOpacity(0.8),
-                                    fontSize: 20,
-                                  ),
+                              'Loading...',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
                       )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        itemCount: provider.pickingLines.length,
-                        itemBuilder: (context, index) {
-                          final line = provider.pickingLines[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 16.0),
-                            elevation: 4,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16.0)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(24.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
+                    : provider.pickingLines.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No stock move lines found.',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(16.0),
+                            itemCount: provider.pickingLines.length,
+                            itemBuilder: (context, index) {
+                              final line = provider.pickingLines[index];
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 12.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.2),
+                                      spreadRadius: 1,
+                                      blurRadius: 3,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.all(16.0),
+                                  title: Text(
                                     line.displayName,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                        ),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
                                   ),
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
+                                      const SizedBox(height: 8),
                                       Text(
-                                        'Demandé: ${line.productUomQty}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyLarge,
+                                        'Demand: ${line.productUomQty.toStringAsFixed(2)} Units',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey.shade600,
+                                        ),
                                       ),
+                                      const SizedBox(height: 4),
                                       Text(
-                                        'Fait: ${line.quantityDone}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyLarge
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              fontSize: 20,
-                                            ),
+                                        'Done: ${line.quantityDone.toStringAsFixed(2)} Units',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey.shade600,
+                                        ),
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
+                                  trailing: const Icon(
+                                    Icons.chevron_right,
+                                    color: Colors.grey,
+                                  ),
+                                  onTap: () {
+                                    // Navigate to serial scan screen
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => SerialScanScreen(
+                                          pickingLine: line,
+                                          picking: widget.picking,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+              ),
+              
+              // Synchronize Button
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    _synchronizeData();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1976D2),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    elevation: 2,
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.sync, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'Synchronize',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
+                    ],
+                  ),
+                ),
               ),
             ],
           );
         },
       ),
     );
+  }
+
+  Future<void> _synchronizeData() async {
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Synchronizing data to Odoo...'),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final pickingProvider = Provider.of<PickingProvider>(context, listen: false);
+      
+      if (authProvider.token != null) {
+        await pickingProvider.synchronizeWithOdoo(authProvider.token!);
+      }
+      
+      if (mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data synchronized successfully with Odoo!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Synchronization failed: $error'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

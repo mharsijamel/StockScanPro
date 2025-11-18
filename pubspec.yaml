@@ -20,14 +20,26 @@ dependencies:
   
   # Pour le stockage local simple (persistance du token)
   shared_preferences: ^2.2.0
+  
+  # Pour la base de données SQLite
+  sqflite: ^2.3.0
+  path: ^1.8.3
 
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  
+  # For SQLite testing
+  sqflite_common_ffi: ^2.3.0
 
   flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
+  
+  # Add assets folder
+  assets:
+    - assets/images/
+    - assets/icons/

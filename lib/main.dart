@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/picking_provider.dart';
+import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'utils/theme.dart'; // Import your custom theme
@@ -21,9 +22,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PickingProvider()),
       ],
       child: MaterialApp(
-        title: 'Odoo Stock App',
+        title: 'Odoo Stock Viewer',
         theme: appTheme, // Apply your custom theme
-        home: const AuthGate(),
+        home: const SplashScreen(),
       ),
     );
   }
